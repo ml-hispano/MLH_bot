@@ -7,10 +7,13 @@ import credentials as C
 RTM_READ_DELAY = 5 # 1 second delay between reading from RTM
 COMMANDS = {
         'saluda': 'Ola ke ase, me llamo AntonIA y estoy apunto de ser el chatbot más molón que se ha creado en un slack jamás!',
-        'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!', 
+        'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!',
+        'cuenta un chiste' : '¿Qué le dice un tanga a otro? Que coño nos ponemos jajajajajajajaja'
 }
+HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos"], "escribe bien, que te meto un guantazo")
 HOT_REPLY = {
-        'sofia': 'Ojo! Sofia es colegui ;)'
+        'sofia': 'Ojo! Sofia es colegui ;)',
+        'bot' : 'Slackbot nunca hablamos de ti',
 }
 
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
