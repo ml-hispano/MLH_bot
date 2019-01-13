@@ -9,15 +9,17 @@ COMMANDS = {
         'saluda': 'Ola ke ase, me llamo AntonIA y estoy apunto de ser el chatbot más molón que se ha creado en un slack jamás!',
         'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!',
         'cuenta un chiste' : '¿Qué le dice un tanga a otro? Que coño nos ponemos jajajajajajajaja'
+        'cuenta un chiste bueno' : 'Estaba el capitán echando la siesta y de repente uno de los marineros grita:\n¡Tierra a la vista!\nEl capitán, extrañado, sale de su camarote y dice: Imposible, solo somos siete'
+     
 }
-HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos"], "escribe bien, que te meto un guantazo")
+
 HOT_REPLY = {
         'sofia': 'Ojo! Sofia es colegui ;)',
-        'bot' : 'Slackbot nunca hablamos de ti',
+        'bot' : 'Slackbot nunca hablamos de ti'    
 }
+HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos","aver"], "escribe bien, que te meto un guantazo")
 
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
-
 
 slack_client = SlackClient(C.ANTONIA_OAUTH_TOKEN)
 
