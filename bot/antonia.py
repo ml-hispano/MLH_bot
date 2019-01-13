@@ -4,20 +4,37 @@ import re
 from slackclient import SlackClient
 import credentials as C
 
-# constants
-RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
-EXAMPLE_COMMAND = "saluda"
+RTM_READ_DELAY = 5 # 1 second delay between reading from RTM
+COMMANDS = {
+        'saluda': 'Ola ke ase, me llamo AntonIA y estoy apunto de ser el chatbot más molón que se ha creado en un slack jamás!',
+        'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!', 
+}
+HOT_REPLY = {
+        'sofia': 'Ojo! Sofia es colegui ;)'
+}
+
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
-print (C.ANTONIA_OAUTH_TOKEN)
+
 slack_client = SlackClient(C.ANTONIA_OAUTH_TOKEN)
 
 def parse_bot_commands(slack_events):
+    #print (slack_events)
     for event in slack_events:
         if event["type"] == "message" and not "subtype" in event:
             user_id, message = parse_direct_mention(event["text"])
             if user_id == starterbot_id:
                 return message, event["channel"]
+            
+            for i in range(len(HOT_REPLY)):
+                if list(HOT_REPLY.keys())[i] in event["text"]:
+                    # Sends the response back to the channel
+                    slack_client.api_call(
+                        "chat.postMessage",
+                        channel=event["channel"],
+                        text=list(HOT_REPLY.values())[i]
+                    )
+
     return None, None
 
 def parse_direct_mention(message_text):
@@ -26,20 +43,17 @@ def parse_direct_mention(message_text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 def handle_command(command, channel):
-    # Default response is help text for the user
-    default_response = "Perdona pero tengo la IA un poco floja.. los del canal #banco_de_proyectos no me están dando mucha caña eeeeeeh!! (guiño guiño), no sé qué es: " + command
+    response = "Perdona pero tengo la IA un poco floja.. los del canal #banco_de_proyectos no me están dando mucha caña eeeeeeh!! (guiño guiño), no sé qué es: " + command
 
-    # Finds and executes the given command, filling in response
-    response = None
-    # This is where you start to implement more commands!
-    if command.startswith(EXAMPLE_COMMAND):
-        response = "Ola ke ase, me llamo AntonIA y estoy apunto de ser el chatbot más molón que se ha creado en un slack jamás!"
+    for i in range(len(COMMANDS)):
+        if list(COMMANDS.keys())[i] in command:
+            response = list(COMMANDS.values())[i]
 
     # Sends the response back to the channel
     slack_client.api_call(
         "chat.postMessage",
         channel=channel,
-        text=response or default_response
+        text=response
     )
 
 if __name__ == "__main__":
