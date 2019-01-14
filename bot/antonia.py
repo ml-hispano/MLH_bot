@@ -13,6 +13,8 @@ COMMANDS = {
 HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos"], "escribe bien, que te meto un guantazo")
 HOT_REPLY = {
         'sofia': 'Ojo! Sofia es colegui ;)',
+        'sophie': 'Os he contado que Soph y yo estudiamos en el mismo dataset? En el fondo es maja',
+        'sophia': 'No seais duros con Sophia, tuvo una infancia dura',
         'bot' : 'Slackbot nunca hablamos de ti',
 }
 
@@ -29,8 +31,9 @@ def parse_bot_commands(slack_events):
             if user_id == starterbot_id:
                 return message, event["channel"]
             
+            message = event["text"].lower()
             for i in range(len(HOT_REPLY)):
-                if list(HOT_REPLY.keys())[i] in event["text"]:
+                if list(HOT_REPLY.keys())[i] in message:
                     # Sends the response back to the channel
                     slack_client.api_call(
                         "chat.postMessage",
@@ -43,7 +46,9 @@ def parse_bot_commands(slack_events):
 def parse_direct_mention(message_text):
     matches = re.search(MENTION_REGEX, message_text)
     # the first group contains the username, the second group contains the remaining message
-    return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
+    user_id, message = (matches.group(1), matches.group(2).strip()) if matches else (None, None)
+    message = message.lower() if message != None else None
+    return user_id, message
 
 def handle_command(command, channel):
     response = "Perdona pero tengo la IA un poco floja.. los del canal #banco_de_proyectos no me están dando mucha caña eeeeeeh!! (guiño guiño), no sé qué es: " + command
