@@ -19,7 +19,7 @@ HOT_REPLY = {
         'sophia': 'No seais duros con Sophia, tuvo una infancia dura',
         'bot' : 'Slackbot nunca hablamos de ti',
 }
-HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos","aver"], "escribe bien, que te meto un guantazo")
+#HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos","aver"], "escribe bien, que te meto un guantazo")
 
 MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
@@ -55,9 +55,14 @@ def parse_direct_mention(message_text):
 def handle_command(command, channel):
     response = "Perdona pero tengo la IA un poco floja.. los del canal #banco_de_proyectos no me están dando mucha caña eeeeeeh!! (guiño guiño), no sé qué es: " + command
 
+    is_auto_response = False
     for i in range(len(COMMANDS)):
         if list(COMMANDS.keys())[i] in command:
             response = list(COMMANDS.values())[i]
+            is_auto_response = True
+
+    if not is_auto_response:
+        response = answer(model, char2int, int2char, command)
 
     # Sends the response back to the channel
     slack_client.api_call(
