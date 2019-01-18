@@ -22,7 +22,7 @@ HOT_REPLY = {
 }
 #HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos","aver"], "escribe bien, que te meto un guantazo")
 
-MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+MENTION_REGEX = "(.*)<@(|[WU].+?)>(.*)"
 
 slack_client = SlackClient(C.ANTONIA_OAUTH_TOKEN)
 random_reply_counter = randint(20, 150)
@@ -61,7 +61,7 @@ def parse_bot_commands(slack_events):
 def parse_direct_mention(message_text):
     matches = re.search(MENTION_REGEX, message_text)
     # the first group contains the username, the second group contains the remaining message
-    user_id, message = (matches.group(1), matches.group(2).strip()) if matches else (None, None)
+    user_id, message = (matches.group(2), matches.group(1).strip() + matches.group(3).strip()) if matches else (None, None)
     message = message.lower() if message != None else None
     return user_id, message
 
