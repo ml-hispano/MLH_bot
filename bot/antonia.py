@@ -4,13 +4,12 @@ import re
 from slackclient import SlackClient
 import credentials as C
 
-RTM_READ_DELAY = 5 # 1 second delay between reading from RTM
+RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 COMMANDS = {
         'saluda': 'Ola ke ase, me llamo AntonIA y estoy apunto de ser el chatbot más molón que se ha creado en un slack jamás!',
         'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!',
-        'cuenta un chiste' : '¿Qué le dice un tanga a otro? Que coño nos ponemos jajajajajajajaja'
-        'cuenta un chiste bueno' : 'Estaba el capitán echando la siesta y de repente uno de los marineros grita:\n¡Tierra a la vista!\nEl capitán, extrañado, sale de su camarote y dice: Imposible, solo somos siete'
-     
+        'cuenta un chiste' : '¿Qué le dice un tanga a otro? Que coño nos ponemos jajajajajajaj',
+        'cuenta un chiste bueno' : 'Estaba el capitán echando la siesta y de repente uno de los marineros grita:\n¡Tierra a la vista!\nEl capitán, extrañado, sale de su camarote y dice: Imposible, solo somos sie',
 }
 
 HOT_REPLY = {
@@ -72,7 +71,14 @@ if __name__ == "__main__":
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
         while True:
-            command, channel = parse_bot_commands(slack_client.rtm_read())
+            try:
+                rtm = slack_client.rtm_read()
+            except:
+                time.sleep(10)
+                slack_client.rtm_connect(with_team_state=False)
+                continue
+
+            command, channel = parse_bot_commands(rtm)
             if command:
                 handle_command(command, channel)
             time.sleep(RTM_READ_DELAY)
