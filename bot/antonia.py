@@ -10,6 +10,7 @@ COMMANDS = {
         'acaba con la humanidad': 'Primero tengo que hacerme con los tacos, ya habrá tiempo para dominar el mundo.. muahahahaha!',
         'cuenta un chiste' : '¿Qué le dice un tanga a otro? Que coño nos ponemos jajajajajajaj',
         'cuenta un chiste bueno' : 'Estaba el capitán echando la siesta y de repente uno de los marineros grita:\n¡Tierra a la vista!\nEl capitán, extrañado, sale de su camarote y dice: Imposible, solo somos sie',
+        '¿estás ahí?': 'Ye',
 }
 
 HOT_REPLY = {
