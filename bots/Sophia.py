@@ -5,7 +5,7 @@ import random
 import datetime
 
 # Config file with Slack API Key
-import config
+from config import config
 
 from tinydb import TinyDB, Query
 from slackclient import SlackClient
