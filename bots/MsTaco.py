@@ -122,7 +122,7 @@ def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
          "chat.postMessage",
          channel=receiv_user,
          as_user=True,
-         text="¡*Has recibido {0:g} x :taco:* de <@" + giving_user + ">!".format(n_tacos))
+         text=("¡*Has recibido {0:g} x :taco: * de <@" + giving_user + ">!").format(n_tacos))
 
  else:
 
