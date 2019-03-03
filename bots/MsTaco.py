@@ -178,8 +178,11 @@ def parse_taco_event(event, reaction=False):
         receiv_usr = matches.group(1) if matches else None
         n_tacos = event["text"].count(":taco:") + event["text"].count(":medio_taco:") / 2
     else:
-        receiv_usr = event['item_user']
-        n_tacos = 1 if event['reaction'] == "taco" else 0.5
+        if 'item_user' in event:
+            receiv_usr = event['item_user']
+            n_tacos = 1 if event['reaction'] == "taco" else 0.5
+        else:
+            return None, None
 
     giving_usr = event["user"]
 
