@@ -7,26 +7,22 @@ import datetime
 # Config file with Slack API Key
 from config import config
 
-from tinydb import TinyDB, Query
 from slackclient import SlackClient
 
 # instantiate Slack client
-slack_client = SlackClient(config.SOPHIA_BOT_TOKEN)
+slack_client = SlackClient(config.MSTACO_BOT_TOKEN)
 
 # starterbot's user ID in Slack: value is assigned after the bot starts up
 starterbot_id = None
 
 # constants
-RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
+RTM_READ_DELAY = 1  # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "/info"
-MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+MENTION_REGEX = "<@(|[WU].+?)>(.*)"
 
 # Get the channels list and identifiers:
 channels = slack_client.api_call("conversations.list")['channels']
-users    = slack_client.api_call("users.list")
-
-# db = TinyDB('./db/db.json')
-# db.insert({'int': 1, 'char': 'a'})
+users = slack_client.api_call("users.list")
 
 # Auxiliar methods to translate channel names
 # to IDs and IDs to names.
@@ -34,21 +30,20 @@ def get_channel_name_by_id(channel_id):
     for channel in channels:
         if channel['id'] == channel_id:
             return channel['name']
-    raise ValueError('Channel ID not found!')
+    return ""
+    # raise ValueError('Channel ID not found!')
+
 
 def get_channel_id_by_name(channel_name):
     for channel in channels:
         if channel['name'] == channel_name:
             return channel['id']
-    raise ValueError('Channel name not found!')
-
-# def give_points(sender, receiver, n_points):
-#     return 0
+    return ""
+    # raise ValueError('Channel name not found!')
 
 
 # To-do: decouple messages.
 def get_info_for_channel(channel):
-
     info = ''
 
     if channel == 'lectura-de-papers':
@@ -61,21 +56,23 @@ def get_info_for_channel(channel):
 *- Y esta semana... -*
 -----------------------------------------------------
 :memo: - Paper 04 - *Distilling the Knowledge in a Neural Network* - Cómo hacer modelos más eficientes y pequeños que aprenden de otros modelos más grandes : https://arxiv.org/abs/1503.02531
- 
+
 '''.format('')
 
-        init_date = 2 # Wednesday
+        init_date = 2  # Wednesday
         today = datetime.date.weekday(datetime.date.today())
 
         if (init_date - today) % 7 + 1 == 1:
             info += ''':alarm_clock: *Hoy es el último día* para leer y discutir este artículo. ¡Anímate! :alarm_clock:'''
         if (init_date - today) % 7 + 1 > 1:
-            info += ''':alarm_clock: Quedan *{} días* para leer y discutir este artículo. ¡Anímate! :alarm_clock:'''.format((init_date - today) % 7 + 1)
+            info += ''':alarm_clock: Quedan *{} días* para leer y discutir este artículo. ¡Anímate! :alarm_clock:'''.format(
+                (init_date - today) % 7 + 1)
 
     else:
         info += "No hay ninguna información registrada para el canal #" + channel + ". Próximamente los moderadores se encargarán de resolver esto."
 
     return info
+
 
 # slack_client.api_call(
 #   "chat.postMessage",
@@ -89,6 +86,98 @@ def get_info_for_channel(channel):
 #   text="@AntonIA !!! ¿¿Dónde estás?? Que te reviento, QUE TE REVIENTO!! :glitch_crab:"
 # )
 
+from tinydb import TinyDB, Query
+from tinydb.operations import add, subtract
+
+db = TinyDB('./db/users.json')
+
+DAILY_TACOS = 5
+
+def give_tacos(giving_user, receiv_user, n_tacos):
+
+ user = Query()
+
+ init_user(giving_user)
+ init_user(receiv_user)
+
+ giving_owned_tacos = db.search(user.user_id == giving_user)[0]['daily_tacos']
+
+ if giving_owned_tacos - n_tacos >= 0:
+     db.update(add('owned_tacos', n_tacos),      user.user_id == receiv_user)
+     db.update(subtract('daily_tacos', n_tacos), user.user_id == giving_user)
+
+     slack_client.api_call(
+         "chat.postMessage",
+         channel=giving_user,
+         as_user=True,
+         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte!".format(n_tacos))
+
+     slack_client.api_call(
+         "chat.postMessage",
+         channel=receiv_user,
+         as_user=True,
+         text="¡*Has recibido {0:g} x :taco:* de <@" + giving_user + ">!".format(n_tacos))
+
+ else:
+
+     slack_client.api_call(
+         "chat.postMessage",
+         channel=giving_user,
+         as_user=True,
+         text="*¡No tienes suficientes tacos!* Recibirás {0:g} TACOS NUEVOS :taco: recién cocinados en *{1:} horas.*".format(DAILY_TACOS, 2))
+
+     # To-do: Send giving user private message : No more tacos! You have to wait... {Time}
+
+ return None
+
+def give_bonus_taco(user):
+
+    # Give daily 'talking once' bonus taco.
+    db.update(add('owned_tacos', 1),  Query().user_id == user)
+    db.update({'daily_bonus': False}, Query().user_id == user)
+    owned_tacos = db.search(Query().user_id == user)[0]['owned_tacos']
+
+    slack_client.api_call(
+        "chat.postMessage",
+        channel=user,
+        as_user=True,
+        text="¡Toma! Aquí tienes *1 TACO de premio por participar hoy en la comunidad*. Ya tienes *{0:g}x :taco: * ¡Vuelve mañana a por más!".format(owned_tacos))
+
+    return
+
+def reset_daily_tacos():
+    # Give new tacos and reset the 'talking once' bonus.
+    db.update({'daily_tacos': DAILY_TACOS, 'daily_bonus' : True})
+    print("LOG: ¡Reset diario ejecutado!")
+    return
+
+def parse_taco_event(event, reaction=False):
+
+    if not reaction:
+        matches = re.search(MENTION_REGEX, event["text"])
+        receiv_usr = matches.group(1) if matches else None
+        n_tacos = event["text"].count(":taco:") + event["text"].count(":medio_taco:") / 2
+    else:
+        receiv_usr = event['item_user']
+        n_tacos = 1 if event['reaction'] == "taco" else 0.5
+
+    giving_usr = event["user"]
+
+    # If user is not the bot, and giver and receiver are not the same...
+    if (giving_usr != starterbot_id and receiv_usr and giving_usr != receiv_usr):
+        give_tacos(giving_usr, receiv_usr, n_tacos)
+
+    return None, None
+
+def init_user(user_id):
+
+    db_user = db.search(Query()['user_id'] == user_id)
+
+    # If giving user not in DB. Create it!
+    if not db_user:
+        db.insert({'user_id': user_id, 'daily_tacos': DAILY_TACOS, 'daily_bonus': True, 'owned_tacos': 0})
+
+
 def parse_bot_commands(slack_events):
     """
         Parses a list of events coming from the Slack RTM API to find bot commands.
@@ -96,8 +185,31 @@ def parse_bot_commands(slack_events):
         If its not found, then this function returns None, None.
     """
     for event in slack_events:
+
+        print(event)
+
+        if event["type"] == "message" and 'user' in event:
+
+            init_user(event['user'])
+
+            if db.search(Query()['user_id'] == event['user'])[0]['daily_bonus'] == True:
+                give_bonus_taco(event['user'])
+
+        # Event : Detect taco emojis in message.
         if event["type"] == "message" and not "subtype" in event:
+            if ":taco:" in event["text"] or ":medio_taco:" in event["text"]:
+                return parse_taco_event(event, reaction=False)
+
+        # Event : Detect taco reaction to message.
+        if event["type"] == "reaction_added":
+            print(event["item"])
+            if "taco" == event["reaction"] or "medio_taco" == event["reaction"]:
+                return parse_taco_event(event, reaction=True)
+
+        if event["type"] == "message" and not "subtype" in event:
+
             user_id, message = parse_direct_mention(event["text"])
+
             if user_id == starterbot_id:
                 return message, event["channel"]
     return None, None
@@ -112,6 +224,7 @@ def parse_direct_mention(message_text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 def handle_command(command, channel):
+
     """
         Executes bot command if the command is known
     """
@@ -129,7 +242,9 @@ def handle_command(command, channel):
     # Finds and executes the given command, filling in response
     response = None
     # This is where you start to implement more commands!
+
     if command.startswith(EXAMPLE_COMMAND):
+        reset_daily_tacos()
         response = get_info_for_channel(get_channel_name_by_id(channel))
 
     # Sends the response back to the channel
@@ -139,13 +254,29 @@ def handle_command(command, channel):
         text=response or default_response
     )
 
+# Save today's day.
+today = time.gmtime().tm_mday
+
 if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
+
         while True:
+
             command, channel = parse_bot_commands(slack_client.rtm_read())
+
+            # Compare if now is not today anymore.
+            now = time.gmtime().tm_mday
+
+            # In that case, trigger the daily taco reset.
+            if now != today:
+                today = now
+                reset_daily_tacos()
+            else:
+                print("Not reset yet! Just wait {} hour(s)".format((6 - time.gmtime().tm_hour) % 24))
+
             if command:
                 print("Received command :" + command)
                 handle_command(command, channel)
