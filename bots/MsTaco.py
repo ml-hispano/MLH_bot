@@ -91,9 +91,12 @@ from tinydb.operations import add, subtract
 
 db = TinyDB('./db/users.json')
 
+# Should be located into a table.
+db_logs = TinyDB('./db/logs.json')
+
 DAILY_TACOS = 5
 
-def give_tacos(giving_user, receiv_user, n_tacos):
+def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
 
  user = Query()
 
@@ -105,6 +108,9 @@ def give_tacos(giving_user, receiv_user, n_tacos):
  if giving_owned_tacos - n_tacos >= 0:
      db.update(add('owned_tacos', n_tacos),      user.user_id == receiv_user)
      db.update(subtract('daily_tacos', n_tacos), user.user_id == giving_user)
+
+     # LOG to DB
+     db_logs.insert({'giving_user' : giving_user, 'receiver_user' : receiv_user, 'n_tacos' : n_tacos, 'type' : 'reaction' if reaction else 'message', 'date' : today })
 
      slack_client.api_call(
          "chat.postMessage",
@@ -124,7 +130,7 @@ def give_tacos(giving_user, receiv_user, n_tacos):
          "chat.postMessage",
          channel=giving_user,
          as_user=True,
-         text="*¡No tienes suficientes tacos!* Recibirás {0:g} TACOS NUEVOS :taco: recién cocinados en *{1:} horas.*".format(DAILY_TACOS, 2))
+         text="*¡No tienes suficientes tacos!* Recibirás {0:g} TACOS NUEVOS :taco: recién cocinados en *{1:} horas.*".format(DAILY_TACOS, time_left))
 
      # To-do: Send giving user private message : No more tacos! You have to wait... {Time}
 
@@ -137,6 +143,8 @@ def give_bonus_taco(user):
     db.update({'daily_bonus': False}, Query().user_id == user)
     owned_tacos = db.search(Query().user_id == user)[0]['owned_tacos']
 
+    db_logs.insert({'giving_user': None, 'receiver_user': user, 'n_tacos': 1, 'type': 'bonus', 'date' : today })
+
     slack_client.api_call(
         "chat.postMessage",
         channel=user,
@@ -148,7 +156,18 @@ def give_bonus_taco(user):
 def reset_daily_tacos():
     # Give new tacos and reset the 'talking once' bonus.
     db.update({'daily_tacos': DAILY_TACOS, 'daily_bonus' : True})
+
+    # Compute all the tacos from yesterday.
+    n_tacos = sum([i['n_tacos'] for i in db_logs.search((Query().date == today))])
+
+    slack_client.api_call(
+        "chat.postMessage",
+        channel=get_channel_id_by_name('1_chat-general'),
+        as_user=True,
+        text="*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{0:g}x :taco: *".format(n_tacos))
+
     print("LOG: ¡Reset diario ejecutado!")
+
     return
 
 def parse_taco_event(event, reaction=False):
@@ -165,7 +184,7 @@ def parse_taco_event(event, reaction=False):
 
     # If user is not the bot, and giver and receiver are not the same...
     if (giving_usr != starterbot_id and receiv_usr and giving_usr != receiv_usr):
-        give_tacos(giving_usr, receiv_usr, n_tacos)
+        give_tacos(giving_usr, receiv_usr, n_tacos, reaction)
 
     return None, None
 
@@ -254,7 +273,11 @@ def handle_command(command, channel):
     )
 
 # Save today's day.
-today = time.gmtime().tm_mday
+today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
+# Save number of hours before reset.
+time_left = 0
+# Reset system at 6am.
+RESET_HOUR = 6
 
 if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
@@ -267,14 +290,15 @@ if __name__ == "__main__":
             command, channel = parse_bot_commands(slack_client.rtm_read())
 
             # Compare if now is not today anymore.
-            now = time.gmtime().tm_mday
+            now = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
 
             # In that case, trigger the daily taco reset.
             if now != today:
-                today = now
                 reset_daily_tacos()
+                today = now
             else:
-                print("Not reset yet! Just wait {} hour(s)".format((6 - time.gmtime().tm_hour) % 24))
+                time_left = (RESET_HOUR - time.gmtime().tm_hour) % 24
+                # print("Not reset yet! Just wait {} hour(s)".format(())
 
             if command:
                 print("Received command :" + command)
