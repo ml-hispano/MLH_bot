@@ -166,6 +166,7 @@ def reset_daily_tacos():
         as_user=True,
         text="*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{0:g}x :taco: *".format(n_tacos))
 
+    print_leaderboard(get_channel_id_by_name('1_chat-general'))
     print("LOG: ¡Reset diario ejecutado!")
 
     return
@@ -187,6 +188,28 @@ def parse_taco_event(event, reaction=False):
         give_tacos(giving_usr, receiv_usr, n_tacos, reaction)
 
     return None, None
+
+def print_leaderboard(channel):
+
+    mess = '*Machine Learning Hispano Leaderboard :taco:*\n'
+
+    db_list = sorted(db.all(), key=lambda k: k['owned_tacos'], reverse=True)
+
+    # Top 10 elements
+    for i, l in enumerate(db_list[:min(len(db_list), 9)]):
+        mess += str(i+1) + "). " + "<@" + l['user_id'] + "> `" + str(l['owned_tacos']) + "`\n"
+
+    slack_client.api_call(
+        "chat.postMessage",
+        channel=channel,
+        as_user=True,
+        text=mess)
+
+    print(channel)
+    print(mess)
+
+    return
+
 
 def init_user(user_id):
 
@@ -244,33 +267,9 @@ def parse_direct_mention(message_text):
 
 def handle_command(command, channel):
 
-    """
-        Executes bot command if the command is known
-    """
-    # Default response is help text for the user
-    default_responses = ["No te he entendido... Prueba a usar el comando *{}* para obtener información del canal.",
-                         "¿Acaso te has leído mi manual de instrucciones? Usa el comando *{}* y te daré info del canal.",
-                         "Error 404, comando no encontrado. Mejor usa el comando *{}* y te daré info del canal.",
-                         "¿No querrás mejor utilizar el comando *{}* para obtener más información del canal?"]
+    if command.startswith('/leaderboard'):
+        response = print_leaderboard(channel)
 
-    default_response = random.choice(default_responses)
-
-    default_response = default_response.format(EXAMPLE_COMMAND)
-    # default_response = "Wall-E?".format(EXAMPLE_COMMAND)
-
-    # Finds and executes the given command, filling in response
-    response = None
-    # This is where you start to implement more commands!
-
-    if command.startswith(EXAMPLE_COMMAND):
-        response = get_info_for_channel(get_channel_name_by_id(channel))
-
-    # Sends the response back to the channel
-    slack_client.api_call(
-        "chat.postMessage",
-        channel=channel,
-        text=response or default_response
-    )
 
 # Save today's day.
 today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
