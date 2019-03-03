@@ -244,7 +244,6 @@ def handle_command(command, channel):
     # This is where you start to implement more commands!
 
     if command.startswith(EXAMPLE_COMMAND):
-        reset_daily_tacos()
         response = get_info_for_channel(get_channel_name_by_id(channel))
 
     # Sends the response back to the channel
