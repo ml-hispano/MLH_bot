@@ -116,7 +116,7 @@ def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
          "chat.postMessage",
          channel=giving_user,
          as_user=True,
-         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte!".format(n_tacos))
+         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte! Te quedan {1:g} tacos para repartir.".format(n_tacos,  db.search(Query()['user_id'] == giving_user)[0]['daily_bonus']))
 
      slack_client.api_call(
          "chat.postMessage",
@@ -279,7 +279,7 @@ today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(ti
 # Save number of hours before reset.
 time_left = 0
 # Reset system at 6am.
-RESET_HOUR = 6
+RESET_HOUR = 2
 
 if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
@@ -291,8 +291,9 @@ if __name__ == "__main__":
 
             command, channel = parse_bot_commands(slack_client.rtm_read())
 
+            now_time = time.gmtime(time.time() - 3600 * (RESET_HOUR - 1))
             # Compare if now is not today anymore.
-            now = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
+            now = str(now_time.tm_year) + str(now_time.tm_mon).zfill(2) + str(now_time.tm_mday).zfill(2)
 
             # In that case, trigger the daily taco reset.
             if now != today:
