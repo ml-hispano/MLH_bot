@@ -116,7 +116,7 @@ def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
          "chat.postMessage",
          channel=giving_user,
          as_user=True,
-         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte! Te quedan {1:g} tacos para repartir.".format(n_tacos,  db.search(Query()['user_id'] == giving_user)[0]['daily_taco']))
+         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte! Te quedan {1:g} tacos para repartir.".format(n_tacos,  db.search(Query()['user_id'] == giving_user)[0]['daily_tacos']))
 
      slack_client.api_call(
          "chat.postMessage",
