@@ -201,9 +201,20 @@ def print_leaderboard(channel):
 
     db_list = sorted(db.all(), key=lambda k: k['owned_tacos'], reverse=True)
 
+    bots_id = [None, 'UGMETH49H']
+
+    i = 1
+    L = 9
+
     # Top 10 elements
-    for i, l in enumerate(db_list[:min(len(db_list), 9)]):
-        mess += str(i+1) + "). " + "<@" + l['user_id'] + "> `" + str(l['owned_tacos']) + "`\n"
+    for l in db_list:
+
+        if i <= min(len(db_list), L):
+            if l['user_id'] not in bots_id:
+                print(i, l)
+                mess += str(i) + "). " + "<@" + l['user_id'] + "> `" + str(l['owned_tacos']) + "`\n"
+                i += 1
+        else: break
 
     slack_client.api_call(
         "chat.postMessage",
