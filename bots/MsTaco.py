@@ -96,7 +96,7 @@ db_logs = TinyDB('./db/logs.json')
 
 DAILY_TACOS = 5
 
-def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
+def give_tacos(giving_user, receiv_user, n_tacos, reaction=False, channel=None):
 
  user = Query()
 
@@ -116,13 +116,15 @@ def give_tacos(giving_user, receiv_user, n_tacos, reaction=False):
          "chat.postMessage",
          channel=giving_user,
          as_user=True,
-         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte! Te quedan {1:g} tacos para repartir.".format(n_tacos,  db.search(Query()['user_id'] == giving_user)[0]['daily_tacos']))
+         text="¡<@" + receiv_user + "> *ha recibido {0:g} x :taco:* de tu parte! Te quedan {1:g} tacos para repartir hoy.".format(n_tacos,  db.search(Query()['user_id'] == giving_user)[0]['daily_tacos']))
+
+     owned_tacos = db.search(Query().user_id == receiv_user)[0]['owned_tacos']
 
      slack_client.api_call(
          "chat.postMessage",
          channel=receiv_user,
          as_user=True,
-         text=("¡ *Has recibido {0:g} x :taco: * de <@" + giving_user + ">!").format(n_tacos))
+         text=("¡*Has recibido {0:g} x :taco: * de <@" + giving_user + "> en el canal <#" + channel + ">! Ya tienes *{1:g}x :taco: ").format(n_tacos, owned_tacos))
 
  else:
 
@@ -185,10 +187,11 @@ def parse_taco_event(event, reaction=False):
             return None, None
 
     giving_usr = event["user"]
+    channel = event["item"]["channel"] if reaction else event["channel"]
 
     # If user is not the bot, and giver and receiver are not the same...
     if (giving_usr != starterbot_id and receiv_usr and giving_usr != receiv_usr):
-        give_tacos(giving_usr, receiv_usr, n_tacos, reaction)
+        give_tacos(giving_usr, receiv_usr, n_tacos, reaction, channel)
 
     return None, None
 
