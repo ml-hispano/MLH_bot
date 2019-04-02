@@ -3,6 +3,7 @@ import time
 import re
 import random
 import datetime
+from Memia import Memia
 
 # Config file with Slack API Key
 from config import config
@@ -27,6 +28,8 @@ users    = slack_client.api_call("users.list")
 
 # db = TinyDB('./db/db.json')
 # db.insert({'int': 1, 'char': 'a'})
+
+memia = None
 
 # Auxiliar methods to translate channel names
 # to IDs and IDs to names.
@@ -131,6 +134,9 @@ def handle_command(command, channel):
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
         response = get_info_for_channel(get_channel_name_by_id(channel))
+    if command.find("meme") is not -1:
+        memia.cmd(command, channel)
+        return
 
     # Sends the response back to the channel
     slack_client.api_call(
@@ -144,6 +150,7 @@ if __name__ == "__main__":
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
+        memia = Memia(slack_client)
         while True:
             command, channel = parse_bot_commands(slack_client.rtm_read())
             if command:
