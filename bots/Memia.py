@@ -41,26 +41,11 @@ class Memia:
         "Este meme Casi Se Ve superado por los chistes de cierta persona",
     ]
 
-    def __init__(self, slack_client):
+    def __init__(self, slack_client, starterbot_id):
         self.slack_client = slack_client
-        self.reload_memes()
         self.scheduler = sched.scheduler(time.time, time.sleep)
-        if self.DAILY_POST: self.daily_meme(False)
-
-
-    def daily_meme(self, show=True):
-        if show:
-            try:
-                offtopic_id = self.get_channel_id_by_name('offtopic')
-                self.send_random_meme(offtopic_id, 'Daily meme')
-
-            except ValueError:
-                print('Offtopic channel not found, can not post daily meme')
-
-        next_post = self.seconds_to_post_time()
-        self.scheduler.enter(next_post, 1, self.daily_meme, ())
-        self.scheduler.run()
-
+        self.post_time = self.calculate_post_time()
+        self.bot_id = starterbot_id
 
     def get_memes_urls(self):
         r = requests.get('https://api.github.com/repos/{}/{}/contents/{}'
@@ -93,17 +78,21 @@ class Memia:
             attachments=attachments
         )
 
-    def cmd(self, command, channel):
-        self.send_random_meme(channel)
+    def uses_command(self, event):
+        if event["text"].lower().find("meme") != -1 \
+                and event["text"].find("<@{}>".format(self.bot_id)) != -1:
+            self.send_random_meme(event["channel"])
+            return True
 
-    def seconds_to_post_time(self):
+        return False
+
+    def calculate_post_time(self):
         now = datetime.now()
         today_post_time = datetime(year=now.year, month=now.month,
                             day=now.day, hour=self.POST_TIME['hour'],
                             minute=self.POST_TIME['min'], second=self.POST_TIME['sec'])
 
-        post_time = today_post_time + timedelta((1 if now > today_post_time else 0))
-        return (post_time - now).seconds
+        return today_post_time + timedelta((1 if now > today_post_time else 0))
 
     def get_channel_id_by_name(self, channel_name):
         channels = self.slack_client.api_call("conversations.list")['channels']
@@ -112,6 +101,17 @@ class Memia:
                 return channel['id']
         raise ValueError('Channel name not found!')
 
+    def is_post_time(self):
+        return self.post_time < datetime.now()
+
+    def send_daily_meme(self):
+        self.post_time = self.post_time + timedelta(1)
+
+        if self.DAILY_POST:
+            offtopic_id = self.get_channel_id_by_name('offtopic')
+            self.send_random_meme(offtopic_id, 'Daily meme')
+
+        self.reload_memes()
 
 # For sending image from local it will be like this
 # But is slower and uses more network

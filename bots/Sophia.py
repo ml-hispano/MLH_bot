@@ -20,7 +20,7 @@ starterbot_id = None
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "/info"
-MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
+MENTION_REGEX = ".*<@(|[WU].+?)>(.*)"
 
 # Get the channels list and identifiers:
 channels = slack_client.api_call("conversations.list")['channels']
@@ -100,6 +100,9 @@ def parse_bot_commands(slack_events):
     """
     for event in slack_events:
         if event["type"] == "message" and not "subtype" in event:
+            if memia.uses_command(event):
+                break
+
             user_id, message = parse_direct_mention(event["text"])
             if user_id == starterbot_id:
                 return message, event["channel"]
@@ -134,9 +137,6 @@ def handle_command(command, channel):
     # This is where you start to implement more commands!
     if command.startswith(EXAMPLE_COMMAND):
         response = get_info_for_channel(get_channel_name_by_id(channel))
-    if command.find("meme") is not -1:
-        memia.cmd(command, channel)
-        return
 
     # Sends the response back to the channel
     slack_client.api_call(
@@ -150,12 +150,16 @@ if __name__ == "__main__":
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
-        memia = Memia(slack_client)
+        memia = Memia(slack_client, starterbot_id)
         while True:
             command, channel = parse_bot_commands(slack_client.rtm_read())
             if command:
                 print("Received command :" + command)
                 handle_command(command, channel)
+
+            if memia.is_post_time():
+                memia.send_daily_meme()
+
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection failed. Exception traceback printed above.")
