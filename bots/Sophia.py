@@ -135,7 +135,7 @@ def handle_command(command, channel):
     if command.startswith(EXAMPLE_COMMAND):
         response = get_info_for_channel(get_channel_name_by_id(channel))
     if command.find("meme") is not -1:
-        memia.cmd(slack_client, command, channel)
+        memia.cmd(command, channel)
         return
 
     # Sends the response back to the channel
@@ -149,8 +149,8 @@ if __name__ == "__main__":
     if slack_client.rtm_connect(with_team_state=False):
         print("Starter Bot connected and running!")
         # Read bot's user ID by calling Web API method `auth.test`
-        memia = Memia()
         starterbot_id = slack_client.api_call("auth.test")["user_id"]
+        memia = Memia(slack_client)
         while True:
             command, channel = parse_bot_commands(slack_client.rtm_read())
             if command:
