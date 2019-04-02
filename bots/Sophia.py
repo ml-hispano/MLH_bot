@@ -20,7 +20,7 @@ starterbot_id = None
 # constants
 RTM_READ_DELAY = 1 # 1 second delay between reading from RTM
 EXAMPLE_COMMAND = "/info"
-MENTION_REGEX = ".*<@(|[WU].+?)>(.*)"
+MENTION_REGEX = "^<@(|[WU].+?)>(.*)"
 
 # Get the channels list and identifiers:
 channels = slack_client.api_call("conversations.list")['channels']
