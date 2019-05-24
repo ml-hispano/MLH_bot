@@ -64,6 +64,7 @@ def print_leaderboard(channel):
 
 def extract_direct_command(message_text):
     matches = re.search(MENTION_REGEX, message_text)
+    if matches is None: return
     user_id = matches.group(1)
     if matches and user_id == slack.starterbot_id:
         return matches.group(2).strip()
