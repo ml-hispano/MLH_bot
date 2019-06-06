@@ -1,0 +1,10 @@
+# Contains SLACK API TOKEN
+**/config/
+
+**/images/
+
+.idea/
+bots/MsTaco/db/*.json
+bots/MsTaco/src/config.py
+**/__pycache__/*
+
