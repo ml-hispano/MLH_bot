@@ -34,4 +34,8 @@ def setup():
 
 
 def get_events():
-    return slack_client.rtm_read()
+    ret = False
+    try:
+        ret = slack_client.rtm_read()
+    finally:
+        return ret
