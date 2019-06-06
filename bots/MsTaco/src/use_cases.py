@@ -14,7 +14,7 @@ def give_tacos(giver_id, receiver_id, given_tacos, reaction=False, channel=None)
         giver.remove_tacos(given_tacos)
 
         _notify_tacos_sent(giver.user_id, receiver.user_id, given_tacos, giver.remaining_tacos())
-        _notify_tacos_received(giver.user_id, receiver.user_id, given_tacos, giver.owned_tacos(), channel)
+        _notify_tacos_received(giver.user_id, receiver.user_id, given_tacos, receiver.owned_tacos(), channel)
 
         _log_taco_transaction(giver.user_id, receiver.user_id, given_tacos, reaction, get_today())
     else:
