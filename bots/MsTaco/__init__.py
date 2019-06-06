@@ -26,8 +26,7 @@ def handle_mention(event):
 
 
 def handle_reaction(event):
-    if TACO.replace(':', '') == event["reaction"] or HALF_TACO.replace(':', '') == event[
-        "reaction"] and 'item_user' in event:
+    if (TACO.replace(':', '') == event["reaction"] or HALF_TACO.replace(':', '') == event["reaction"]) and 'item_user' in event:
         giver_id = event["user"]
         receiver_id = event['item_user']
         given_tacos = 1 if event['reaction'] == TACO.replace(':', '') else 0.5
@@ -46,23 +45,29 @@ def handle_direct_command(event):
 
 # main loop
 if __name__ == "__main__":
-    if slack.setup():
-        print("Starter Bot connected and running!")
-        while True:
-            is_new_day = update_time()
-            if is_new_day:
-                use_cases.reset_daily_tacos()
+    while True:
+        if slack.setup():
+            print("Starter Bot connected and running!")
+            #use_cases.reset_daily_tacos()
+        
+            while True:
+                is_new_day = update_time()
+                if is_new_day:
+                    use_cases.reset_daily_tacos()
 
-            for event in slack.get_events():
-                if event["type"] == "message" and not "subtype" in event:
-                    handle_daily_bonus(event)
-                    handle_mention(event)
-                elif event["type"] == "reaction_added":
-                    handle_reaction(event)
+                events = slack.get_events()
+                if events is False: break;
+
+                for event in events:
+                    if event["type"] == "message" and not "subtype" in event:
+                        handle_daily_bonus(event)
+                        handle_mention(event)
+                    elif event["type"] == "reaction_added":
+                        handle_reaction(event)
                 
-                if event["type"] == "message" and not "subtype" in event:
-                    handle_direct_command(event)
+                    if event["type"] == "message" and not "subtype" in event:
+                        handle_direct_command(event)
 
-            time.sleep(RTM_READ_DELAY)
-    else:
-        print("Connection failed. Exception traceback printed above.")
+                time.sleep(RTM_READ_DELAY)
+        else:
+            print("Connection failed. Exception traceback printed above.")
