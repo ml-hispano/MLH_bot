@@ -66,4 +66,4 @@ def save_log(log):
 
 
 def daily_taco_cunt():
-    return sum([i['n_tacos'] for i in logs_db.search((Query().date == get_today()))])
+    return sum([i['n_tacos'] for i in logs_db.search((Query().date == get_yesterday()))])
