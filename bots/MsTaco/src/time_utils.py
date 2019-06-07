@@ -1,9 +1,13 @@
 import time
+import datetime
 
 # time variables
 from src.config import RESET_HOUR
 
 today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
+ayer = datetime.date.today() - datetime.timedelta(days = 1)
+yesterday = ayer.strftime('%Y%m%d')
+
 time_left = 0
 
 
@@ -23,6 +27,9 @@ def update_time():
 
 def get_today():
     return today
+
+def get_yesterday():
+    return yesterday
 
 
 def get_time_left():
