@@ -3,7 +3,7 @@ from tinydb import TinyDB, Query
 from tinydb.operations import add, subtract
 
 from src.config import DAILY_TACOS
-from src.time_utils import get_today
+from src.time_utils import get_yesterday
 
 users_db = TinyDB('./db/users.json')
 logs_db = TinyDB('./db/logs.json')

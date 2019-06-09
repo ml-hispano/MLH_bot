@@ -46,9 +46,9 @@ def handle_direct_command(event):
 # main loop
 if __name__ == "__main__":
     while True:
+        #use_cases.reset_daily_tacos()
         if slack.setup():
             print("Starter Bot connected and running!")
-            #use_cases.reset_daily_tacos()
         
             while True:
                 is_new_day = update_time()
