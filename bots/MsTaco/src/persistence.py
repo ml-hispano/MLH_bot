@@ -4,6 +4,7 @@ from tinydb.operations import add, subtract
 
 from src.config import DAILY_TACOS
 from src.time_utils import get_yesterday
+from src.time_utils import get_lastweek
 
 users_db = TinyDB('./db/users.json')
 logs_db = TinyDB('./db/logs.json')
@@ -37,6 +38,10 @@ class DBUser:
     @staticmethod
     def get_top_ranking():
         return sorted(users_db.all(), key=lambda k: k['owned_tacos'], reverse=True)
+
+    @staticmethod
+    def get_weekly_info():
+        return logs_db.search(Query().date.test(lambda x: x >= get_lastweek()))
 
     def update(self):
         self.user = users_db.get(Query()['user_id'] == self.user_id)

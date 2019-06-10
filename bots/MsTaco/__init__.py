@@ -40,7 +40,10 @@ def handle_direct_command(event):
     command = use_cases.extract_direct_command(event["text"])
 
     if command == '/leaderboard':
-        use_cases.print_leaderboard(event["channel"])
+        use_cases.print_weekly_leaderboard(event["channel"])
+
+    if command == '/weeklyleaderboard':
+        use_cases.print_weekly_leaderboard(event["channel"])
 
 
 # main loop
@@ -49,7 +52,6 @@ if __name__ == "__main__":
         #use_cases.reset_daily_tacos()
         if slack.setup():
             print("Starter Bot connected and running!")
-        
             while True:
                 is_new_day = update_time()
                 if is_new_day:

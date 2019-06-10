@@ -4,12 +4,13 @@ import datetime
 # time variables
 from src.config import RESET_HOUR
 
-today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
-ayer = datetime.date.today() - datetime.timedelta(days = 1)
-yesterday = ayer.strftime('%Y%m%d')
+today     = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
+yesterday = (datetime.date.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
+lastweek  = (datetime.date.today() - datetime.timedelta(days = datetime.date.today().weekday())).strftime('%Y%m%d')
 
 time_left = 0
 
+print(today, lastweek)
 
 def update_time():
     global today, time_left
@@ -31,6 +32,8 @@ def get_today():
 def get_yesterday():
     return yesterday
 
+def get_lastweek():
+    return lastweek
 
 def get_time_left():
     return time_left

@@ -1,4 +1,5 @@
 import re
+import operator
 import src.persistence as persistence
 import src.slack as slack
 from src.config import DAILY_TACOS, MENTION_REGEX
@@ -43,7 +44,7 @@ def reset_daily_tacos():
 
 
 def print_leaderboard(channel):
-    message = '*Machine Learning Hispano Leaderboard :taco:*\n'
+    message = '*MLH Taco Leaderboard :taco:*\n'
     db_list = persistence.DBUser.get_top_ranking()
     bots_id = [None, 'UGMETH49H']
 
@@ -60,6 +61,39 @@ def print_leaderboard(channel):
             break
 
     slack.send_message(channel, message)
+
+def print_weekly_leaderboard(channel):
+    message = '*MLH Taco Weekly Leaderboard :taco:*\n'
+    db_list = persistence.DBUser.get_weekly_info()
+    bots_id = [None, 'UGMETH49H']
+
+    i = 1
+    top_n = 10
+
+    week_logs = {}
+
+    # Reduce weekly logs to get the total number of tacos per user.
+    for log in db_list:
+        user = log['receiver_user']
+        if user != None:
+            if user in week_logs:
+                week_logs[user] = week_logs[user] + log['n_tacos']
+            else:
+                week_logs.update({user: log['n_tacos']})
+
+    week_logs = sorted(week_logs.items(), key=operator.itemgetter(1), reverse=True)
+
+    # Top 10 elements
+    for user_id, n_tacos in week_logs:
+        if i <= min(len(db_list), top_n):
+            if user_id not in bots_id:
+                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos) + "`\n"
+                i += 1
+        else:
+            break
+
+    slack.send_message(channel, message)
+
 
 
 def extract_direct_command(message_text):
