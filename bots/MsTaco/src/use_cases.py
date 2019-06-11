@@ -40,7 +40,7 @@ def reset_daily_tacos():
 
     message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: *"
     slack.send_message(slack.channel_to_id['1_chat-general'], message)
-    print_leaderboard(slack.channel_to_id['1_chat-general'])
+    print_weekly_leaderboard(slack.channel_to_id['1_chat-general'])
 
 
 def print_leaderboard(channel):
@@ -87,7 +87,7 @@ def print_weekly_leaderboard(channel):
     for user_id, n_tacos in week_logs:
         if i <= min(len(db_list), top_n):
             if user_id not in bots_id:
-                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos) + "`\n"
+                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos).rstrip(".0") + "`\n"
                 i += 1
         else:
             break
