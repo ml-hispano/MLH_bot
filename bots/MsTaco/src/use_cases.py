@@ -87,7 +87,7 @@ def print_weekly_leaderboard(channel):
     for user_id, n_tacos in week_logs:
         if i <= min(len(db_list), top_n):
             if user_id not in bots_id:
-                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos).rstrip(".0") + "`\n"
+                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos).replace('.0','') + "`\n"
                 i += 1
         else:
             break
