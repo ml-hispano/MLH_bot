@@ -4,7 +4,7 @@ import datetime
 # time variables
 from src.config import RESET_HOUR
 
-today     = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
+today = str(time.gmtime().tm_year) + str(time.gmtime().tm_mon).zfill(2) + str(time.gmtime().tm_mday).zfill(2)
 yesterday = (datetime.date.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
 lastweek  = (datetime.date.today() - datetime.timedelta(days = datetime.date.today().weekday())).strftime('%Y%m%d')
 
@@ -20,6 +20,8 @@ def update_time():
 
     if now != today:
         today = now
+        yesterday = (datetime.date.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
+        lastweek  = (datetime.date.today() - datetime.timedelta(days = datetime.date.today().weekday())).strftime('%Y%m%d')
         return True
     else:
         time_left = (RESET_HOUR - time.gmtime().tm_hour) % 24
