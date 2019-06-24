@@ -13,7 +13,8 @@ time_left = 0
 print(today, lastweek)
 
 def update_time():
-    global today, time_left
+
+    global today, yesterday, lastweek, time_left
 
     now_time = time.gmtime(time.time() - 3600 * (RESET_HOUR - 1))
     now = str(now_time.tm_year) + str(now_time.tm_mon).zfill(2) + str(now_time.tm_mday).zfill(2)
@@ -22,8 +23,10 @@ def update_time():
         today = now
         yesterday = (datetime.date.today() - datetime.timedelta(days = 1)).strftime('%Y%m%d')
         lastweek  = (datetime.date.today() - datetime.timedelta(days = datetime.date.today().weekday())).strftime('%Y%m%d')
+
         return True
     else:
+
         time_left = (RESET_HOUR - time.gmtime().tm_hour) % 24
         return False
 

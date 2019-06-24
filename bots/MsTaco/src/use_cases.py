@@ -38,13 +38,17 @@ def reset_daily_tacos():
     # Compute all the tacos from yesterday.
     daily_taco_count = persistence.daily_taco_cunt()
 
-    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: *"
-    slack.send_message(slack.channel_to_id['1_chat-general'], message)
     print_weekly_leaderboard(slack.channel_to_id['1_chat-general'])
 
 
 def print_leaderboard(channel):
-    message = '*MLH Taco Leaderboard :taco:*\n'
+
+    # Compute all the tacos from yesterday.
+    daily_taco_count = persistence.daily_taco_cunt()
+
+    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: \n*"
+
+    message += '*MLH Taco Leaderboard :taco:*\n'
     db_list = persistence.DBUser.get_top_ranking()
     bots_id = [None, 'UGMETH49H']
 
@@ -63,7 +67,13 @@ def print_leaderboard(channel):
     slack.send_message(channel, message)
 
 def print_weekly_leaderboard(channel):
-    message = '*MLH Taco Weekly Leaderboard :taco:*\n'
+
+    # Compute all the tacos from yesterday.
+    daily_taco_count = persistence.daily_taco_cunt()
+
+    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: *\n"
+
+    message += '*MLH Taco Weekly Leaderboard :taco:*\n'
     db_list = persistence.DBUser.get_weekly_info()
     bots_id = [None, 'UGMETH49H']
 
