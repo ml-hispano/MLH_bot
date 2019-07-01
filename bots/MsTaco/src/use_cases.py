@@ -52,17 +52,21 @@ def print_leaderboard(channel):
     db_list = persistence.DBUser.get_top_ranking()
     bots_id = [None, 'UGMETH49H']
 
-    i = 1
-    top_n = 10
+    if len(db_list) == 0:
+        message += "1). El leaderboard `0`\n 2). semanal `0`\n 3). se ha `0`\n 4). reiniciado `0`\n 5). es tu `0`\n 6). oportunidad `0`\n 7). para `0`\n 8). estrenarlo `0`\n 9) :taco: :taco: :taco: `0`\n"
+    else:
 
-    # Top 10 elements
-    for l in db_list:
-        if i <= min(len(db_list), top_n):
-            if l['user_id'] not in bots_id:
-                message += str(i) + "). " + "<@" + l['user_id'] + "> `" + str(l['owned_tacos']) + "`\n"
-                i += 1
-        else:
-            break
+        i = 1
+        top_n = 10
+
+        # Top 10 elements
+        for l in db_list:
+            if i <= min(len(db_list), top_n):
+                if l['user_id'] not in bots_id:
+                    message += str(i) + "). " + "<@" + l['user_id'] + "> `" + str(l['owned_tacos']) + "`\n"
+                    i += 1
+            else:
+                break
 
     slack.send_message(channel, message)
 
