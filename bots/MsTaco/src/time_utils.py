@@ -40,5 +40,8 @@ def get_yesterday():
 def get_lastweek():
     return lastweek
 
+def get_prevweek():
+    return (datetime.date.today() - datetime.timedelta(days = datetime.date.today().weekday() + 7)).strftime('%Y%m%d')
+
 def get_time_left():
     return time_left
