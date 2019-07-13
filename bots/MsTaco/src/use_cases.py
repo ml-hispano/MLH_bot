@@ -46,9 +46,9 @@ def print_leaderboard(channel):
     # Compute all the tacos from yesterday.
     daily_taco_count = persistence.daily_taco_cunt()
 
-    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: \n*"
+    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: \n\n*"
 
-    message += '*MLH Taco Leaderboard :taco:*\n'
+    message += '*MLH Leaderboard de Tacos :taco:*\n'
     db_list = persistence.DBUser.get_top_ranking()
     bots_id = [None, 'UGMETH49H']
 
@@ -73,9 +73,18 @@ def print_weekly_leaderboard(channel):
 
     message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: *\n"
 
-    message += '*MLH Taco Weekly Leaderboard :taco:*\n'
     db_list = persistence.DBUser.get_weekly_info()
     bots_id = [None, 'UGMETH49H']
+
+    is_final = False # Is the final leaderboard?
+
+    if len(db_list) == 0:
+        message += '*MLH Leaderboard Semanal Final de Tacos :taco:*\n'
+        db_list  = persistence.DBUser.get_prev_weekly_info()
+        is_final = True
+
+    else:
+        message += '*MLH Leaderboard Semanal de Tacos :taco:*\n'
 
     i = 1
     top_n = 10
@@ -97,10 +106,18 @@ def print_weekly_leaderboard(channel):
     for user_id, n_tacos in week_logs:
         if i <= min(len(db_list), top_n):
             if user_id not in bots_id:
-                message += str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos).replace('.0','') + "`\n"
+                if (is_final and i < 4):
+                    medals = [":first_place_medal:", ":second_place_medal:", ":third_place_medal:"]
+                    message +=  medals[i-1] + " " + "<@" + user_id + "> `" + str(n_tacos).replace('.0','') + "`\n"
+                else:
+                    message +=     str(i) + "). " + "<@" + user_id + "> `" + str(n_tacos).replace('.0', '') + "`\n"
+
                 i += 1
         else:
             break
+
+    if is_final:
+        message += "\n *¡El ranking semanal de tacos ha sido reiniciado!*"
 
     slack.send_message(channel, message)
 
