@@ -124,28 +124,21 @@ def print_weekly_leaderboard(channel):
 
 def print_leaderboard_me(channel, user):
 
-    # Compute all the tacos from yesterday.
-    daily_taco_count = persistence.daily_taco_cunt()
-
-    message = f"*¡INFO-TACO!* El número total de tacos repartidos ayer en la comunidad es de *{daily_taco_count}x :taco: \n\n*"
-
-
     db_list = persistence.DBUser.get_top_ranking()
 
     # Find user in ranking
-    users_taco = ({'pos':i, 'info':db_info} for i, db_info in enumerate(db_list) if db_info['user_id'] == user)
+    users_generator = ({'pos':i + 1, 'info':db_info} for i, db_info in enumerate(db_list) if db_info['user_id'] == user)
+
+    user_taco = next(users_generator)
 
     # If not in ranking, maybe it's a error or the user doesn't have tacos
-    if len(users_taco) == 0:
-        message += '*No apareces en nuestro registro de tacos :sad_parrot:. ¿Has recibido algún taco?*\n'
-        return
+    if user_taco is None:
+        message = '*No apareces en nuestro registro de tacos :sad_parrot:. ¿Has recibido algún taco?*\n'
 
-    # We want only one user
-    user_taco = users_taco[0]
-
-    message += "<@" + user + "> \n"
-    message += "*Tacos:    * `" + str(user_taco['pos']) + "` :taco: \n"
-    message += "*Posición: * `" + str(user_taco['info']['owned_tacos']) + "` :medalla: \n"
+    else:
+        message = ":taco: Stats de <@" + user + ">:\n"
+        message += "\t\t*Posición: * `" +  str(user_taco['pos']) + "` \n"
+        message += "\t\t*Tacos:    * `" +  str(user_taco['info']['owned_tacos']) + "`  \n"
 
     slack.send_message(channel, message)
 
