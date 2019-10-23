@@ -42,6 +42,9 @@ def handle_direct_command(event):
     if command == '/leaderboard':
         use_cases.print_leaderboard(event["channel"])
 
+    if command == '/leaderboard_me':
+        use_cases.print_leaderboard_me(event["channel"], event["user"])
+
     if command == '/weeklyleaderboard':
         use_cases.print_weekly_leaderboard(event["channel"])
 
