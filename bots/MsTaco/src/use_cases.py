@@ -122,6 +122,26 @@ def print_weekly_leaderboard(channel):
     slack.send_message(channel, message)
 
 
+def print_leaderboard_me(channel, user):
+
+    db_list = persistence.DBUser.get_top_ranking()
+
+    # Find user in ranking
+    users_generator = ({'pos':i + 1, 'info':db_info} for i, db_info in enumerate(db_list) if db_info['user_id'] == user)
+
+    user_taco = next(users_generator)
+
+    # If not in ranking, maybe it's a error or the user doesn't have tacos
+    if user_taco is None:
+        message = '*No apareces en nuestro registro de tacos :sad_parrot:. ¿Has recibido algún taco?*\n'
+
+    else:
+        message = ":taco: Stats de <@" + user + ">:\n"
+        message += "\t\t*Posición: * `" +  str(user_taco['pos']) + "` \n"
+        message += "\t\t*Tacos:    * `" +  str(user_taco['info']['owned_tacos']) + "`  \n"
+
+    slack.send_message(channel, message)
+
 
 def extract_direct_command(message_text):
     matches = re.search(MENTION_REGEX, message_text)
