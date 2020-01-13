@@ -14,12 +14,7 @@ COMMANDS = {
         '¿estás ahí?': 'Ye',
 }
 
-HOT_REPLY = {
-        'sofia': 'Ojo! Sofia es colegui ;)',
-        'sophie': 'Os he contado que Soph y yo estudiamos en el mismo dataset? En el fondo es maja',
-        'sophia': 'No seais duros con Sophia, tuvo una infancia dura',
-        'bot' : 'Slackbot nunca hablamos de ti',
-}
+
 #HOT_REPLY = dict.fromkeys(["aiga","haiga","llendo","A parte","si quiera","contra más","contra menos","aver"], "escribe bien, que te meto un guantazo")
 
 MENTION_REGEX = "(.*)<@(|[WU].+?)>(.*)"
