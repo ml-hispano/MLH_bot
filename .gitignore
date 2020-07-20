@@ -7,4 +7,5 @@
 bots/MsTaco/db/*.json
 bots/MsTaco/src/config.py
 **/__pycache__/*
+*.pyc
 

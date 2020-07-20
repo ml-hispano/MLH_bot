@@ -4,7 +4,7 @@ from src.config import MSTACO_BOT_TOKEN
 
 slack_client = SlackClient(MSTACO_BOT_TOKEN)
 
-channels = slack_client.api_call("conversations.list")['channels']
+channels = slack_client.api_call("conversations.list").get('channels',[])
 users = slack_client.api_call("users.list")
 
 starterbot_id = None
