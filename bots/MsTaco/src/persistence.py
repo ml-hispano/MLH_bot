@@ -24,6 +24,7 @@ class DBUser:
                 'user_id': user_id,
                 'daily_tacos': DAILY_TACOS,
                 'daily_bonus': True,
+                'urls': [],
                 'owned_tacos': 0
             })
             db_user = users_db.get(doc_id=db_user_id)
@@ -49,10 +50,12 @@ class DBUser:
     def update(self):
         self.user = users_db.get(Query()['user_id'] == self.user_id)
 
-    def add_tacos(self, amount, bonus=False):
+    def add_tacos(self, amount, bonus=False, url=''):
         users_db.update(add('owned_tacos', amount), Query()['user_id'] == self.user_id)
         if bonus:
             users_db.update({'daily_bonus': False}, Query()['user_id'] == self.user_id)
+        if url:
+            users_db.update(add('urls', [url]), Query()['user_id'] == self.user_id)
         self.update()
 
     def remove_tacos(self, amount):
@@ -61,6 +64,9 @@ class DBUser:
 
     def remaining_tacos(self):
         return self.user['daily_tacos']
+
+    def urls(self):
+        return self.user['urls']
 
     def owned_tacos(self):
         return self.user['owned_tacos']

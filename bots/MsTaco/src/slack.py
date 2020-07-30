@@ -23,6 +23,15 @@ def send_message(user_id, message):
         text=message
     )
 
+def get_messages(channel, msg_ts):
+    resp = slack_client.api_call(
+        "conversations.history", 
+        channel=channel,
+        inclusive=true,
+        limit=1,
+        latest=msg_ts
+        )
+    return resp.json()["messages"]
 
 def setup():
     global starterbot_id
