@@ -22,7 +22,7 @@ def handle_mention(event):
         channel = event["channel"]
 
         if giver_id != slack.starterbot_id and receiver_id != slack.starterbot_id and giver_id != receiver_id:
-            use_cases.give_tacos(giver_id, receiver_id, given_tacos, False, channel)
+            use_cases.give_tacos(giver_id, receiver_id, given_tacos, False, channel, event["text"])
 
 
 def handle_reaction(event):
@@ -31,9 +31,11 @@ def handle_reaction(event):
         receiver_id = event['item_user']
         given_tacos = 1 if event['reaction'] == TACO.replace(':', '') else 0.5
         channel = event["item"]["channel"]
+        ts = event["item"]['ts']
+        messages = slack.get_messages(channel, ts)
 
         if giver_id != slack.starterbot_id and receiver_id != slack.starterbot_id and giver_id != receiver_id:
-            use_cases.give_tacos(giver_id, receiver_id, given_tacos, True, channel)
+            use_cases.give_tacos(giver_id, receiver_id, given_tacos, True, channel, messages[0])
 
 
 def handle_direct_command(event):

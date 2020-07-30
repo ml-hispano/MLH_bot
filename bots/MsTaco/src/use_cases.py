@@ -2,16 +2,18 @@ import re
 import operator
 import src.persistence as persistence
 import src.slack as slack
-from src.config import DAILY_TACOS, MENTION_REGEX
+from src.config import DAILY_TACOS, MENTION_REGEX, URL_REGEX
 from src.time_utils import get_today, get_time_left
 
-
-def give_tacos(giver_id, receiver_id, given_tacos, reaction=False, channel=None):
+def give_tacos(giver_id, receiver_id, given_tacos, reaction=False, channel=None, message=""):
     giver = persistence.DBUser(giver_id)
     receiver = persistence.DBUser(receiver_id)
 
+    match_url = re.search(URL_REGEX, message)
+    url = match_url.group(2) if match_url else None
+
     if giver.remaining_tacos() >= given_tacos:
-        receiver.add_tacos(given_tacos)
+        receiver.add_tacos(given_tacos, url=url)
         giver.remove_tacos(given_tacos)
 
         _notify_tacos_sent(giver.user_id, receiver.user_id, given_tacos, giver.remaining_tacos())

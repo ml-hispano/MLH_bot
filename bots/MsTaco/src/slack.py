@@ -4,7 +4,7 @@ from src.config import MSTACO_BOT_TOKEN
 
 slack_client = SlackClient(MSTACO_BOT_TOKEN)
 
-channels = slack_client.api_call("conversations.list")['channels']
+channels = slack_client.api_call("conversations.list").get('channels',[])
 users = slack_client.api_call("users.list")
 
 starterbot_id = None
@@ -23,6 +23,15 @@ def send_message(user_id, message):
         text=message
     )
 
+def get_messages(channel, msg_ts):
+    resp = slack_client.api_call(
+        "conversations.history", 
+        channel=channel,
+        inclusive=true,
+        limit=1,
+        latest=msg_ts
+        )
+    return resp.json()["messages"]
 
 def setup():
     global starterbot_id
